@@ -50,7 +50,6 @@ export default createRoute(async (c) => {
                   動画URLが正常に保存されました！
                 </div>
               )}
-
               <VideoAddForm />
             </div>
           </div>
