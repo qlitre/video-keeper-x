@@ -18,7 +18,18 @@ export default createRoute(async (c) => {
 
   // 認証チェック結果を取得（未認証でも閲覧は許可）
 
-  // 最新の動画を取得（上位5件）
+  // クエリパラメータによる検索対応
+  const search = c.req.query('query')?.trim() || ''
+  const queryArgs: any[] = []
+  let whereClause = ''
+
+  if (search) {
+    whereClause = `
+      WHERE a.name LIKE ? OR v.song_name LIKE ? OR v.venue LIKE ?
+    `
+    queryArgs.push(`%${search}%`, `%${search}%`, `%${search}%`)
+  }
+
   const recentVideos = await c.env.DB.prepare(`
     SELECT 
       v.id,
@@ -31,9 +42,10 @@ export default createRoute(async (c) => {
       v.created_at
     FROM videos v
     LEFT JOIN artists a ON v.artist_id = a.id
+    ${whereClause}
     ORDER BY v.created_at DESC
     LIMIT 5
-  `).all();
+  `).bind(...queryArgs).all();
 
   const videoList = recentVideos.results as unknown as Video[];
 
@@ -98,6 +110,21 @@ export default createRoute(async (c) => {
 
       <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="px-4 py-6 sm:px-0">
+          <form method="get" class="mb-6 max-w-md mx-auto flex gap-2">
+            <input
+              type="text"
+              name="query"
+              value={search}
+              placeholder="アーティスト・曲名・会場名で検索"
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+            />
+            <button
+              type="submit"
+              class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
+            >
+              検索
+            </button>
+          </form>
           {/* ヒーローセクション */}
           <div class="text-center mb-12">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">

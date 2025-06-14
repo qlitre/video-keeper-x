@@ -3,6 +3,9 @@
 # Video Keeper X - リモートD1データベースセットアップスクリプト
 # 使用方法: ./setup-remote-db.sh
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCHEMA_FILE="${SCRIPT_DIR}/schema-remote.sql"
+
 echo "=== Video Keeper X Remote Database Setup ==="
 echo "実行日時: $(date)"
 echo ""
@@ -11,7 +14,7 @@ echo ""
 DB_NAME="video-keeper-x"
 
 echo "🚀 リモートD1データベースにスキーマを適用中..."
-wrangler d1 execute $DB_NAME --remote --file=schema-remote.sql
+wrangler d1 execute $DB_NAME --remote --file="$SCHEMA_FILE"
 
 echo ""
 echo "📊 リモートデータベースの状態確認:"

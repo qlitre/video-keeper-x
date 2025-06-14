@@ -9,7 +9,8 @@ set -e  # エラーで停止
 # データベース名と出力ファイル設定
 DB_NAME="video-keeper-x"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-BACKUP_DIR="./backups"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BACKUP_DIR="$SCRIPT_DIR/backups"
 BACKUP_FILE="$BACKUP_DIR/video-keeper-x_backup_$TIMESTAMP.json"
 
 # バックアップディレクトリの作成
@@ -93,7 +94,7 @@ echo ""
 # 最新のバックアップへのシンボリックリンクを作成
 LATEST_LINK="$BACKUP_DIR/latest.json"
 rm -f "$LATEST_LINK"
-ln -s "$(basename "$BACKUP_FILE")" "$LATEST_LINK"
+ln -sfn "$BACKUP_FILE" "$LATEST_LINK"
 echo "🔗 最新バックアップ: $LATEST_LINK"
 
 echo ""
