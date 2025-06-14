@@ -127,14 +127,10 @@ export default createRoute(async (c) => {
           </form>
           {/* ヒーローセクション */}
           <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">
-              Xの動画URLを保存・管理
-            </h2>
             <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-              Xに投稿された動画URLを保存し、メタ情報で検索・管理できるプラットフォームです
+              Xに投稿された動画URLを保存し、メタ情報で検索・管理するプロジェクトです。
             </p>
           </div>
-
           {/* 最新動画セクション */}
           {videoList.length > 0 && (
             <div class="mb-16">

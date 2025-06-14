@@ -2,11 +2,12 @@ import { createRoute } from 'honox/factory'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { checkauth } from '../../checkauth'
+import VideoAddForm from '../../islands/video-add-form'
 
 const schema = z.object({
   video_url: z.string().url('有効なURLを入力してください'),
   x_account_id: z.string().min(1, 'Xアカウント名は必須です'),
-  artist_name: z.string().min(1, 'アーティスト名は必須です'),
+  artist_id: z.string().min(1, 'アーティストを選択してください'),
   venue: z.string().optional(),
   event_date: z.string().optional(),
   song_name: z.string().optional(),
@@ -66,105 +67,7 @@ export default createRoute(async (c) => {
                 </div>
               )}
 
-              <form action="/videos/add" method="post" class="space-y-6">
-                <div>
-                  <label for="video_url" class="block text-sm font-medium text-gray-700">
-                    動画URL <span class="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="url"
-                    name="video_url"
-                    id="video_url"
-                    required
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    placeholder="https://x.com/username/status/..."
-                  />
-                  <p class="mt-1 text-sm text-gray-500">X（Twitter）の動画投稿URLを入力してください</p>
-                </div>
-
-                <div>
-                  <label for="x_account_id" class="block text-sm font-medium text-gray-700">
-                    投稿者のXアカウント名 <span class="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="x_account_id"
-                    id="x_account_id"
-                    required
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    placeholder="@username (@ は含めない)"
-                  />
-                </div>
-
-                <div>
-                  <label for="artist_name" class="block text-sm font-medium text-gray-700">
-                    アーティスト名 <span class="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="artist_name"
-                    id="artist_name"
-                    required
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    placeholder="演奏者・バンド名"
-                  />
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label for="venue" class="block text-sm font-medium text-gray-700">
-                      会場
-                    </label>
-                    <input
-                      type="text"
-                      name="venue"
-                      id="venue"
-                      class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                      placeholder="ライブハウス名など"
-                    />
-                  </div>
-
-                  <div>
-                    <label for="event_date" class="block text-sm font-medium text-gray-700">
-                      開催日
-                    </label>
-                    <input
-                      type="date"
-                      name="event_date"
-                      id="event_date"
-                      class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label for="song_name" class="block text-sm font-medium text-gray-700">
-                    曲名
-                  </label>
-                  <input
-                    type="text"
-                    name="song_name"
-                    id="song_name"
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    placeholder="演奏された曲名"
-                  />
-                </div>
-
-                <div class="flex justify-end space-x-3">
-                  <a
-                    href="/"
-                    class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    キャンセル
-                  </a>
-                  <button
-                    type="submit"
-                    class="bg-indigo-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    保存
-                  </button>
-                </div>
-              </form>
+              <VideoAddForm />
             </div>
           </div>
         </div>
@@ -187,28 +90,7 @@ export const POST = createRoute(
         return c.redirect('/login', 303);
       }
 
-      const { video_url, x_account_id, artist_name, venue, event_date, song_name } = c.req.valid('form')
-      
-      // アーティストを検索または作成
-      let artistId: string | null = null;
-      
-      // アーティストが既存かチェック
-      const existingArtist = await c.env.DB.prepare(
-        'SELECT id FROM artists WHERE name = ?'
-      ).bind(artist_name).first();
-      
-      if (existingArtist) {
-        artistId = existingArtist.id as string;
-      } else {
-        // 新しいアーティストを作成
-        const artistInsert = await c.env.DB.prepare(
-          'INSERT INTO artists (name) VALUES (?) RETURNING id'
-        ).bind(artist_name).first();
-        
-        if (artistInsert) {
-          artistId = artistInsert.id as string;
-        }
-      }
+      const { video_url, x_account_id, artist_id, venue, event_date, song_name } = c.req.valid('form')
       
       // 動画を保存
       await c.env.DB.prepare(`
@@ -217,7 +99,7 @@ export const POST = createRoute(
       `).bind(
         video_url,
         x_account_id,
-        artistId,
+        artist_id,
         venue || null,
         event_date || null,
         song_name || null
