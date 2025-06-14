@@ -1,5 +1,6 @@
 import { createRoute } from 'honox/factory'
 import { checkauth } from '../../checkauth'
+import { Header } from '../../components/Header'
 
 interface Video {
   id: string
@@ -37,48 +38,10 @@ export default createRoute(async (c) => {
 
   return c.render(
     <div class="min-h-screen bg-gray-50">
-      <nav class="bg-white shadow">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex justify-between h-16">
-            <div class="flex items-center">
-              <a href="/" class="text-xl font-bold text-gray-900">Video Keeper X</a>
-            </div>
-            <div class="flex items-center space-x-4">
-              {authResult.isAuthenticated ? (
-                // ログイン済みユーザー向けヘッダー
-                <>
-                  <a 
-                    href="/videos/add" 
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-flex items-center"
-                  >
-                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    動画を投稿
-                  </a>
-                  <span class="text-sm text-gray-700">
-                    {authResult.user?.email}
-                  </span>
-                  <a 
-                    href="/logout" 
-                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    ログアウト
-                  </a>
-                </>
-              ) : (
-                // 未ログインユーザー向けヘッダー
-                <a 
-                  href="/login" 
-                  class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                >
-                  ログイン
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Header 
+        isAuthenticated={authResult.isAuthenticated} 
+        userEmail={authResult.user?.email}
+      />
 
       <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="px-4 py-6 sm:px-0">

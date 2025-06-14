@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { checkauth } from '../../checkauth'
 import VideoAddForm from '../../islands/video-add-form'
+import { Header } from '../../components/Header'
 
 const schema = z.object({
   video_url: z.string().url('有効なURLを入力してください'),
@@ -26,27 +27,10 @@ export default createRoute(async (c) => {
 
   return c.render(
     <div class="min-h-screen bg-gray-50">
-      <nav class="bg-white shadow">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex justify-between h-16">
-            <div class="flex items-center">
-              <a href="/" class="text-xl font-bold text-gray-900">Video Keeper X</a>
-            </div>
-            <div class="flex items-center space-x-4">
-              <span class="text-sm text-gray-700">
-                {authResult.user?.email}
-              </span>
-              <a 
-                href="/logout" 
-                class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium"
-              >
-                ログアウト
-              </a>
-            </div>
-          </div>
-        </div>
-      </nav>
-
+      <Header 
+        isAuthenticated={authResult.isAuthenticated} 
+        userEmail={authResult.user?.email}
+      />
       <main class="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="px-4 py-6 sm:px-0">
           <div class="bg-white shadow rounded-lg">
