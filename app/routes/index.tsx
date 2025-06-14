@@ -1,5 +1,6 @@
 import { createRoute } from 'honox/factory'
-import { checkauth } from '../checkauth';
+import { checkauth } from '../checkauth'
+import { XEmbed } from '../islands/x-embed'
 
 interface Video {
   id: string
@@ -114,67 +115,74 @@ export default createRoute(async (c) => {
                 </a>
               </div>
             ) : (
-              <div class="divide-y divide-gray-200">
-                {videoList.map((video) => (
-                  <div key={video.id} class="p-6 hover:bg-gray-50">
-                    <div class="flex items-start justify-between">
-                      <div class="flex-1">
-                        <div class="flex items-center mb-2">
-                          <h4 class="text-lg font-medium text-gray-900 mr-3">
+              <div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 p-4">
+                  {videoList.map((video) => (
+                    <div key={video.id} class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                      {/* カードヘッダー */}
+                      <div class="p-3 border-b border-gray-100">
+                        <div class="flex items-center justify-between mb-1">
+                          <h4 class="text-base font-semibold text-gray-900 truncate">
                             {video.artist_name || '不明'}
                           </h4>
-                          {video.song_name && (
-                            <span class="text-sm text-gray-600">
-                              - {video.song_name}
-                            </span>
-                          )}
+                          <div class="text-xs text-gray-400 ml-2">
+                            {new Date(video.created_at).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })}
+                          </div>
                         </div>
                         
-                        <div class="flex flex-wrap items-center gap-2 mb-2">
-                          <span class="text-sm text-gray-500">
+                        {video.song_name && (
+                          <div class="text-sm text-gray-600 mb-1 truncate">
+                            🎵 {video.song_name}
+                          </div>
+                        )}
+                        
+                        <div class="flex flex-wrap items-center gap-1 text-xs">
+                          <span class="text-gray-500 truncate">
                             @{video.x_account_id}
                           </span>
                           {video.venue && (
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                              {video.venue}
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              📍 {video.venue}
                             </span>
                           )}
                           {video.event_date && (
-                            <span class="text-xs text-gray-500">
-                              {new Date(video.event_date).toLocaleDateString('ja-JP')}
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              📅 {new Date(video.event_date).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })}
                             </span>
                           )}
                         </div>
-                        
-                        <div class="text-xs text-gray-400">
-                          {new Date(video.created_at).toLocaleDateString('ja-JP')} に登録
-                        </div>
                       </div>
                       
-                      <div class="ml-4">
-                        <a 
-                          href={video.video_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-                        >
-                          動画を見る
-                          <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </a>
+                      {/* X投稿埋め込みエリア */}
+                      <div class="p-2">
+                        <XEmbed tweetUrl={video.video_url} width={400} />
+                        
+                        {/* アクションボタン */}
+                        <div class="flex justify-center mt-2 pb-2">
+                          <button 
+                            class="text-gray-400 hover:text-gray-600 transition-colors p-1.5 rounded-full hover:bg-gray-100"
+                            title="お気に入り"
+                          >
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
                 
                 {videoList.length === 5 && (
-                  <div class="p-4 text-center border-t">
+                  <div class="p-4 text-center border-t bg-gray-50">
                     <a 
                       href="/videos" 
-                      class="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                      class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
                     >
-                      すべての動画を見る →
+                      すべての動画を見る
+                      <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
                     </a>
                   </div>
                 )}
