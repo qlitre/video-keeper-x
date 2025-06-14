@@ -15,10 +15,7 @@ interface Video {
 export default createRoute(async (c) => {
   const authResult = await checkauth(c);
 
-  // 認証されていない場合はログインページにリダイレクト
-  if (!authResult.isAuthenticated) {
-    return c.redirect('/login', 303);
-  }
+  // 認証チェック結果を取得（未認証でも閲覧は許可）
 
   // データベースから動画一覧を取得（アーティスト名もJOINで取得）
   const videos = await c.env.DB.prepare(`
@@ -47,21 +44,37 @@ export default createRoute(async (c) => {
               <a href="/" class="text-xl font-bold text-gray-900">Video Keeper X</a>
             </div>
             <div class="flex items-center space-x-4">
-              <a 
-                href="/videos/add" 
-                class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-md text-sm font-medium"
-              >
-                動画を追加
-              </a>
-              <span class="text-sm text-gray-700">
-                {authResult.user?.email}
-              </span>
-              <a 
-                href="/logout" 
-                class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium"
-              >
-                ログアウト
-              </a>
+              {authResult.isAuthenticated ? (
+                // ログイン済みユーザー向けヘッダー
+                <>
+                  <a 
+                    href="/videos/add" 
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-flex items-center"
+                  >
+                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    動画を投稿
+                  </a>
+                  <span class="text-sm text-gray-700">
+                    {authResult.user?.email}
+                  </span>
+                  <a 
+                    href="/logout" 
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    ログアウト
+                  </a>
+                </>
+              ) : (
+                // 未ログインユーザー向けヘッダー
+                <a 
+                  href="/login" 
+                  class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  ログイン
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -84,14 +97,26 @@ export default createRoute(async (c) => {
                 </svg>
                 <h3 class="mt-2 text-sm font-medium text-gray-900">動画がありません</h3>
                 <p class="mt-1 text-sm text-gray-500">
-                  最初の動画を追加してみましょう
+                  {authResult.isAuthenticated 
+                    ? '最初の動画を追加してみましょう' 
+                    : 'まだ動画が投稿されていません'
+                  }
                 </p>
-                <a
-                  href="/videos/add"
-                  class="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  動画を追加
-                </a>
+                {authResult.isAuthenticated ? (
+                  <a
+                    href="/videos/add"
+                    class="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    動画を追加
+                  </a>
+                ) : (
+                  <a
+                    href="/login"
+                    class="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    ログインして投稿
+                  </a>
+                )}
               </div>
             </div>
           ) : (
