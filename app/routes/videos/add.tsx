@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { checkauth } from '../../checkauth'
 import VideoAddForm from '../../islands/video-add-form'
 import { Header } from '../../components/Header'
+import { getCookie, deleteCookie } from 'hono/cookie'
 
 const schema = z.object({
   video_url: z.string().url('有効なURLを入力してください'),
@@ -24,6 +25,9 @@ export default createRoute(async (c) => {
 
   const error = c.req.query('error');
   const success = c.req.query('success');
+  
+  // Cookieから保存されたフォームデータを取得
+  const savedFormData = getCookie(c, 'video_form_data');
 
   return c.render(
     <div class="min-h-screen bg-gray-50">
@@ -50,7 +54,7 @@ export default createRoute(async (c) => {
                   動画URLが正常に保存されました！
                 </div>
               )}
-              <VideoAddForm />
+              <VideoAddForm savedFormData={savedFormData} />
             </div>
           </div>
         </div>
@@ -87,6 +91,9 @@ export const POST = createRoute(
         event_date || null,
         song_name || null
       ).run();
+      
+      // フォーム送信成功時にCookieをクリア
+      deleteCookie(c, 'video_form_data');
       
       return c.redirect('/videos/add?success=1', 303);
     } catch (err) {

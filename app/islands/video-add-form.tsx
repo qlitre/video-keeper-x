@@ -6,16 +6,63 @@ interface Artist {
   name_kana: string;
 }
 
-export default function VideoAddForm() {
+interface FormData {
+  video_url?: string;
+  x_account_id?: string;
+  artist?: Artist;
+  venue?: string;
+  event_date?: string;
+  song_name?: string;
+}
+
+interface VideoAddFormProps {
+  savedFormData?: string;
+}
+
+export default function VideoAddForm({ savedFormData }: VideoAddFormProps) {
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [artists, setArtists] = useState<Artist[]>([]);
   const [filteredArtists, setFilteredArtists] = useState<Artist[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<FormData>({});
+
+  // Cookieからデータを復元
+  useEffect(() => {
+    if (savedFormData) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(savedFormData)) as FormData;
+        setFormData(parsed);
+        if (parsed.artist) {
+          setSelectedArtist(parsed.artist);
+        }
+      } catch (error) {
+        console.error('Failed to parse saved form data:', error);
+      }
+    }
+  }, [savedFormData]);
+
+  const saveFormData = (data: FormData) => {
+    try {
+      const serialized = encodeURIComponent(JSON.stringify(data));
+      document.cookie = `video_form_data=${serialized}; path=/; max-age=3600; SameSite=Lax`;
+    } catch (error) {
+      console.error('Failed to save form data:', error);
+    }
+  };
+
+  const handleInputChange = (field: keyof FormData, value: string) => {
+    const newFormData = { ...formData, [field]: value };
+    setFormData(newFormData);
+    saveFormData(newFormData);
+  };
 
   const handleArtistSelect = (artist: Artist) => {
     setSelectedArtist(artist);
+    const newFormData = { ...formData, artist };
+    setFormData(newFormData);
+    saveFormData(newFormData);
     setIsModalOpen(false);
     setSearchQuery("");
   };
@@ -72,6 +119,8 @@ export default function VideoAddForm() {
           name="video_url"
           id="video_url"
           required
+          value={formData.video_url || ''}
+          onChange={(e) => handleInputChange('video_url', (e.target as HTMLInputElement).value)}
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           placeholder="https://x.com/username/status/..."
         />
@@ -87,18 +136,21 @@ export default function VideoAddForm() {
           name="x_account_id"
           id="x_account_id"
           required
+          value={formData.x_account_id || ''}
+          onChange={(e) => handleInputChange('x_account_id', (e.target as HTMLInputElement).value)}
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           placeholder="@username (@ は含めない)"
         />
       </div>
 
       <div class="relative">
-        <label class="block text-sm font-medium text-gray-700">
+        <label for="artist_select" class="block text-sm font-medium text-gray-700">
           アーティスト名 <span class="text-red-500">*</span>
         </label>
         <div class="mt-1 block w-full">
           <button
             type="button"
+            id="artist_select"
             onClick={handleOpenModal}
             class={`w-full px-3 py-2 border rounded-md shadow-sm text-left focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
               selectedArtist 
@@ -154,6 +206,8 @@ export default function VideoAddForm() {
             type="text"
             name="venue"
             id="venue"
+            value={formData.venue || ''}
+            onChange={(e) => handleInputChange('venue', (e.target as HTMLInputElement).value)}
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             placeholder="ライブハウス名など"
           />
@@ -167,6 +221,8 @@ export default function VideoAddForm() {
             type="date"
             name="event_date"
             id="event_date"
+            value={formData.event_date || ''}
+            onChange={(e) => handleInputChange('event_date', (e.target as HTMLInputElement).value)}
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
@@ -180,6 +236,8 @@ export default function VideoAddForm() {
           type="text"
           name="song_name"
           id="song_name"
+          value={formData.song_name || ''}
+          onChange={(e) => handleInputChange('song_name', (e.target as HTMLInputElement).value)}
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           placeholder="演奏された曲名"
         />
@@ -267,7 +325,7 @@ export default function VideoAddForm() {
                             : "アーティストが登録されていません"}
                         </div>
                         <a
-                          href="/artists/add"
+                          href="/artists/add?return_to=video_add"
                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                           <svg
@@ -309,7 +367,7 @@ export default function VideoAddForm() {
                   {/* Add new artist button - always visible */}
                   <div class="mt-4 pt-4 border-t border-gray-200">
                     <a
-                      href="/artists/add"
+                      href="/artists/add?return_to=video_add"
                       class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                       <svg
