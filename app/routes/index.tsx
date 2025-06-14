@@ -44,8 +44,8 @@ export default createRoute(async (c) => {
     FROM videos v
     LEFT JOIN artists a ON v.artist_id = a.id
     ${whereClause}
-    ORDER BY v.created_at DESC
-    LIMIT 5
+    ORDER BY v.event_date DESC
+    LIMIT 20
   `).bind(...queryArgs).all();
 
   const videoList = recentVideos.results as unknown as Video[];

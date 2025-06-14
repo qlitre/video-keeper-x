@@ -31,7 +31,7 @@ export default createRoute(async (c) => {
       v.created_at
     FROM videos v
     LEFT JOIN artists a ON v.artist_id = a.id
-    ORDER BY v.created_at DESC
+    ORDER BY v.event_date DESC
   `).all();
 
   const videoList = videos.results as unknown as Video[];
