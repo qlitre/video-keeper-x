@@ -1,10 +1,10 @@
 /**
  * X (旧 Twitter) 埋め込み用コンポーネント
- * 
+ *
  * @description
  * X投稿を動画付きで埋め込み表示するコンポーネント
  * Twitter公式のwidgets.jsを使用して、動画やメディアを含む投稿を完全に表示
- * 
+ *
  * @features
  * - 自動でwidgets.jsを読み込み
  * - 動画付きツイートの再生機能
@@ -77,10 +77,10 @@ export function XEmbed({ tweetUrl, width }: XEmbedProps) {
       // Twitter埋め込みウィジェットを作成
       ;(window as any).twttr.widgets
         .createTweet(tweetId, containerRef.current, {
-          dnt: true,          // Do-Not-Track有効
-          theme: 'light',     // ライトテーマ
-          align: 'center',    // 中央寄せ
-          width: width || '100%',  // 横幅を最大に
+          dnt: true, // Do-Not-Track有効
+          theme: 'light', // ライトテーマ
+          align: 'center', // 中央寄せ
+          width: width || '100%', // 横幅を最大に
         })
         .catch((error: unknown) => {
           console.error('X埋め込みエラー:', error)

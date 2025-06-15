@@ -26,7 +26,10 @@ export interface VideoListResult {
 /**
  * 動画の総数を取得する
  */
-export async function getVideoCount(c: Context, query?: string): Promise<number> {
+export async function getVideoCount(
+  c: Context,
+  query?: string
+): Promise<number> {
   const queryArgs: any[] = []
   let whereClause = ''
 
@@ -44,14 +47,19 @@ export async function getVideoCount(c: Context, query?: string): Promise<number>
     ${whereClause}
   `
 
-  const result = await c.env.DB.prepare(sql).bind(...queryArgs).first()
+  const result = await c.env.DB.prepare(sql)
+    .bind(...queryArgs)
+    .first()
   return (result as any)?.count || 0
 }
 
 /**
  * 動画一覧を取得する（ページング対応）
  */
-export async function getVideos(c: Context, options: SearchOptions = {}): Promise<Video[]> {
+export async function getVideos(
+  c: Context,
+  options: SearchOptions = {}
+): Promise<Video[]> {
   const { query, limit = SETTINGS.VIDEOS_PER_PAGE, offset = 0 } = options
   const queryArgs: any[] = []
   let whereClause = ''
@@ -82,44 +90,56 @@ export async function getVideos(c: Context, options: SearchOptions = {}): Promis
   `
 
   queryArgs.push(limit, offset)
-  const result = await c.env.DB.prepare(sql).bind(...queryArgs).all()
+  const result = await c.env.DB.prepare(sql)
+    .bind(...queryArgs)
+    .all()
   return result.results as unknown as Video[]
 }
 
 /**
  * 動画一覧と総数を取得する（ページング処理用）
  */
-export async function getVideosWithCount(c: Context, options: SearchOptions = {}): Promise<VideoListResult> {
+export async function getVideosWithCount(
+  c: Context,
+  options: SearchOptions = {}
+): Promise<VideoListResult> {
   const [videos, totalCount] = await Promise.all([
     getVideos(c, options),
-    getVideoCount(c, options.query)
+    getVideoCount(c, options.query),
   ])
 
   return {
     videos,
-    totalCount
+    totalCount,
   }
 }
 
 /**
  * 最新の動画を取得する（ホームページ用）
  */
-export async function getRecentVideos(c: Context, options: SearchOptions = {}): Promise<Video[]> {
-  return getVideos(c, { 
-    ...options, 
-    limit: options.limit || SETTINGS.HOME_VIDEOS_LIMIT 
+export async function getRecentVideos(
+  c: Context,
+  options: SearchOptions = {}
+): Promise<Video[]> {
+  return getVideos(c, {
+    ...options,
+    limit: options.limit || SETTINGS.HOME_VIDEOS_LIMIT,
   })
 }
 
 /**
  * 動画一覧ページ用の動画を取得する（ページング対応）
  */
-export async function getVideosForPage(c: Context, page: number, query?: string): Promise<VideoListResult> {
+export async function getVideosForPage(
+  c: Context,
+  page: number,
+  query?: string
+): Promise<VideoListResult> {
   const offset = (page - 1) * SETTINGS.VIDEOS_PER_PAGE
-  
+
   return getVideosWithCount(c, {
     query,
     limit: SETTINGS.VIDEOS_PER_PAGE,
-    offset
+    offset,
   })
 }

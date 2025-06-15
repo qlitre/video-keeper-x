@@ -21,7 +21,7 @@ export function Pagination({
   hasPrevPage,
   basePath,
   searchQuery,
-  compact = false
+  compact = false,
 }: PaginationProps) {
   // URLパラメータを構築
   const buildUrl = (page: number) => {
@@ -39,11 +39,11 @@ export function Pagination({
 
   // ページ番号の数を決定（コンパクト版は3個、通常版は5個）
   const maxPageNumbers = compact ? 3 : 5
-  
+
   // 表示するページ番号を計算
   const getPageNumbers = () => {
     const pages = []
-    
+
     if (totalPages <= maxPageNumbers) {
       // 総ページ数が最大表示数以下の場合、すべて表示
       for (let i = 1; i <= totalPages; i++) {
@@ -66,7 +66,7 @@ export function Pagination({
         pages.push(i)
       }
     }
-    
+
     return pages
   }
 
@@ -77,13 +77,15 @@ export function Pagination({
   }
 
   return (
-    <div class={`flex items-center ${compact ? 'justify-center' : 'justify-between'} mt-6`}>
+    <div
+      class={`flex items-center ${compact ? 'justify-center' : 'justify-between'} mt-6`}
+    >
       {!compact && (
         <div class="text-sm text-gray-700">
           {totalCount}件中 {startItem}-{endItem}件目を表示
         </div>
       )}
-      
+
       <div class="flex items-center space-x-2">
         {/* 前のページ */}
         {hasPrevPage ? (
@@ -98,10 +100,10 @@ export function Pagination({
             前へ
           </span>
         )}
-        
+
         {/* ページ番号 */}
         <div class="flex space-x-1">
-          {pageNumbers.map((pageNum) => (
+          {pageNumbers.map(pageNum => (
             <a
               key={pageNum}
               href={buildUrl(pageNum)}
@@ -115,7 +117,7 @@ export function Pagination({
             </a>
           ))}
         </div>
-        
+
         {/* 次のページ */}
         {hasNextPage ? (
           <a

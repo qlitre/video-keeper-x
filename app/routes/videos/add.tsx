@@ -16,36 +16,33 @@ const schema = z.object({
 
 export default createRoute(async (c) => {
   // ミドルウェアで認証済み - ユーザー情報をコンテキストから取得
-  const user = c.get('user');
+  const user = c.get('user')
 
-  const error = c.req.query('error');
-  const success = c.req.query('success');
-  
+  const error = c.req.query('error')
+  const success = c.req.query('success')
+
   // Cookieから保存されたフォームデータを取得
-  const savedFormData = getCookie(c, 'video_form_data');
+  const savedFormData = getCookie(c, 'video_form_data')
 
   return c.render(
-    <div class="min-h-screen bg-gray-50">
-      <Header 
-        isAuthenticated={true} 
-        userEmail={user.email}
-      />
-      <main class="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="px-4 py-6 sm:px-0">
-          <div class="bg-white shadow rounded-lg">
-            <div class="px-4 py-5 sm:p-6">
-              <h2 class="text-lg font-medium text-gray-900 mb-6">動画URLを追加</h2>
-              
+    <div class='min-h-screen bg-gray-50'>
+      <Header isAuthenticated={true} userEmail={user.email} />
+      <main class='max-w-3xl mx-auto py-6 sm:px-6 lg:px-8'>
+        <div class='px-4 py-6 sm:px-0'>
+          <div class='bg-white shadow rounded-lg'>
+            <div class='px-4 py-5 sm:p-6'>
+              <h2 class='text-lg font-medium text-gray-900 mb-6'>動画URLを追加</h2>
+
               {error && (
-                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                <div class='mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded'>
                   {error === 'validation' && 'フォームの入力内容に問題があります。'}
                   {error === 'database' && 'データベースエラーが発生しました。'}
                   {error === 'server' && 'サーバーエラーが発生しました。'}
                 </div>
               )}
-              
+
               {success && (
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                <div class='mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded'>
                   動画URLが正常に保存されました！
                 </div>
               )}
@@ -63,33 +60,39 @@ export const POST = createRoute(
     if (!result.success) {
       return c.redirect('/videos/add?error=validation', 303)
     }
-  }), async (c) => {
+  }),
+  async (c) => {
     try {
       // ミドルウェアで認証済み - ユーザー情報をコンテキストから取得
-      const user = c.get('user');
+      const user = c.get('user')
 
-      const { video_url, x_account_id, artist_id, venue, event_date, song_name } = c.req.valid('form')
-      
+      const { video_url, x_account_id, artist_id, venue, event_date, song_name } =
+        c.req.valid('form')
+
       // 動画を保存
-      await c.env.DB.prepare(`
+      await c.env.DB.prepare(
+        `
         INSERT INTO videos (video_url, x_account_id, artist_id, venue, event_date, song_name)
         VALUES (?, ?, ?, ?, ?, ?)
-      `).bind(
-        video_url,
-        x_account_id,
-        artist_id,
-        venue || null,
-        event_date || null,
-        song_name || null
-      ).run();
-      
+      `
+      )
+        .bind(
+          video_url,
+          x_account_id,
+          artist_id,
+          venue || null,
+          event_date || null,
+          song_name || null
+        )
+        .run()
+
       // フォーム送信成功時にCookieをクリア
-      deleteCookie(c, 'video_form_data');
-      
-      return c.redirect('/videos/add?success=1', 303);
+      deleteCookie(c, 'video_form_data')
+
+      return c.redirect('/videos/add?success=1', 303)
     } catch (err) {
-      console.error('Video save error:', err);
-      return c.redirect('/videos/add?error=database', 303);
+      console.error('Video save error:', err)
+      return c.redirect('/videos/add?error=database', 303)
     }
   }
 )

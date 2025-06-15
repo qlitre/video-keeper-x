@@ -14,14 +14,14 @@ declare module 'hono' {
  */
 export const requireAuthMiddleware = async (c: Context, next: Next) => {
   const authResult = await checkauth(c)
-  
+
   if (!authResult.isAuthenticated || !authResult.user) {
     return c.redirect('/login')
   }
-  
+
   // 認証済みユーザー情報をコンテキストに設定
   c.set('user', authResult.user)
-  
+
   await next()
 }
 
@@ -31,13 +31,13 @@ export const requireAuthMiddleware = async (c: Context, next: Next) => {
  */
 export const requireAuthApiMiddleware = async (c: Context, next: Next) => {
   const authResult = await checkauth(c)
-  
+
   if (!authResult.isAuthenticated || !authResult.user) {
     return c.json({ error: 'Unauthorized' }, 401)
   }
-  
+
   // 認証済みユーザー情報をコンテキストに設定
   c.set('user', authResult.user)
-  
+
   await next()
 }

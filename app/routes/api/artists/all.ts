@@ -5,15 +5,17 @@ export default createRoute(async (c) => {
 
   try {
     // 全アーティストを取得（名前順）
-    const artists = await c.env.DB.prepare(`
+    const artists = await c.env.DB.prepare(
+      `
       SELECT id, name, name_kana 
       FROM artists 
       ORDER BY name
-    `).all();
+    `
+    ).all()
 
-    return c.json(artists.results || []);
+    return c.json(artists.results || [])
   } catch (error) {
-    console.error('Artists fetch error:', error);
-    return c.json({ error: 'Internal server error' }, 500);
+    console.error('Artists fetch error:', error)
+    return c.json({ error: 'Internal server error' }, 500)
   }
 })

@@ -1,76 +1,76 @@
-import { useState, useEffect } from "hono/jsx/dom";
+import { useState, useEffect } from 'hono/jsx/dom'
 
 interface Artist {
-  id: string;
-  name: string;
-  name_kana: string;
+  id: string
+  name: string
+  name_kana: string
 }
 
 interface ArtistAutocompleteProps {
-  onSelect: (artist: Artist) => void;
+  onSelect: (artist: Artist) => void
   /** hidden input の name。デフォルト: "artist_id" */
-  inputName?: string;
+  inputName?: string
 }
 
 export default function ArtistAutocomplete({
   onSelect,
-  inputName = "artist_id",
+  inputName = 'artist_id',
 }: ArtistAutocompleteProps) {
-  const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<Artist[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [query, setQuery] = useState('')
+  const [suggestions, setSuggestions] = useState<Artist[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null)
 
   useEffect(() => {
     const searchArtists = async () => {
       if (query.length < 1) {
-        setSuggestions([]);
-        setShowSuggestions(false);
-        return;
+        setSuggestions([])
+        setShowSuggestions(false)
+        return
       }
 
-      setLoading(true);
+      setLoading(true)
       try {
         const response = await fetch(
           `/api/artists?q=${encodeURIComponent(query)}`
-        );
+        )
         if (response.ok) {
-          const artists = (await response.json()) as Artist[];
-          setSuggestions(artists);
-          setShowSuggestions(true);
+          const artists = (await response.json()) as Artist[]
+          setSuggestions(artists)
+          setShowSuggestions(true)
         }
       } catch (error) {
-        console.error("Artist search error:", error);
+        console.error('Artist search error:', error)
       }
-      setLoading(false);
-    };
+      setLoading(false)
+    }
 
-    const debounceTimer = setTimeout(searchArtists, 300);
-    return () => clearTimeout(debounceTimer);
-  }, [query]);
+    const debounceTimer = setTimeout(searchArtists, 300)
+    return () => clearTimeout(debounceTimer)
+  }, [query])
 
   const handleSelect = (artist: Artist) => {
-    setQuery(artist.name);
-    setShowSuggestions(false);
-    setSelectedArtist(artist);
-    onSelect(artist);
-    console.log("Artist selected:", artist); // デバッグ用
-  };
+    setQuery(artist.name)
+    setShowSuggestions(false)
+    setSelectedArtist(artist)
+    onSelect(artist)
+    console.log('Artist selected:', artist) // デバッグ用
+  }
 
   return (
     <div className="relative">
       <input
         type="text"
         value={query}
-        onChange={(e) => {
-          setQuery((e.target as HTMLInputElement).value);
-          setSelectedArtist(null); // 入力が変更されたら選択状態をクリア
+        onChange={e => {
+          setQuery((e.target as HTMLInputElement).value)
+          setSelectedArtist(null) // 入力が変更されたら選択状態をクリア
         }}
         onFocus={() => query.length > 0 && setShowSuggestions(true)}
         onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
         className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-          selectedArtist ? "border-green-500 bg-green-50" : "border-gray-300"
+          selectedArtist ? 'border-green-500 bg-green-50' : 'border-gray-300'
         }`}
         placeholder="アーティスト名を入力して検索..."
       />
@@ -102,10 +102,10 @@ export default function ArtistAutocomplete({
       )}
 
       {/* hidden input ― 選択済みなら id、未選択なら空文字を保持 */}
-      <input type="hidden" name={inputName} value={selectedArtist?.id ?? ""} />
+      <input type="hidden" name={inputName} value={selectedArtist?.id ?? ''} />
       {showSuggestions && suggestions.length > 0 && (
         <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-          {suggestions.map((artist) => (
+          {suggestions.map(artist => (
             <button
               key={artist.id}
               type="button"
@@ -119,5 +119,5 @@ export default function ArtistAutocomplete({
         </div>
       )}
     </div>
-  );
+  )
 }
