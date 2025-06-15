@@ -1,5 +1,4 @@
 import { createRoute } from 'honox/factory'
-import { Header } from '../../components/Header'
 import { Pagination } from '../../components/Pagination'
 import { getVideosForPage, Video, VideoListResult } from '../../db'
 import { calculatePagination, validatePageNumber, SETTINGS } from '../../settings'
@@ -22,10 +21,7 @@ export default createRoute(async (c) => {
   const pagination = calculatePagination(totalCount, currentPage, SETTINGS.VIDEOS_PER_PAGE)
 
   return c.render(
-    <div class='min-h-screen bg-gray-50'>
-      <Header isAuthenticated={true} userEmail={user.email} />
-
-      <main class='max-w-7xl mx-auto py-6 sm:px-6 lg:px-8'>
+    <main class='max-w-7xl mx-auto py-6 sm:px-6 lg:px-8'>
         <div class='px-4 py-6 sm:px-0'>
           <div class='mb-6'>
             <div class='flex justify-between items-center mb-4'>
@@ -184,7 +180,6 @@ export default createRoute(async (c) => {
             compact={false}
           />
         </div>
-      </main>
-    </div>
+    </main>
   )
 })

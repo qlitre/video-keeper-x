@@ -1,7 +1,6 @@
 import { createRoute } from 'honox/factory'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
-import { Header } from '../../components/Header'
 
 const schema = z.object({
   name: z.string().min(1, 'アーティスト名は必須です'),
@@ -16,10 +15,7 @@ export default createRoute(async (c) => {
   const success = c.req.query('success')
 
   return c.render(
-    <div class='min-h-screen bg-gray-50'>
-      <Header isAuthenticated={true} userEmail={user.email} />
-
-      <main class='max-w-3xl mx-auto py-6 sm:px-6 lg:px-8'>
+    <main class='max-w-3xl mx-auto py-6 sm:px-6 lg:px-8'>
         <div class='px-4 py-6 sm:px-0'>
           <div class='bg-white shadow rounded-lg'>
             <div class='px-4 py-5 sm:p-6'>
@@ -98,8 +94,7 @@ export default createRoute(async (c) => {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   )
 })
 

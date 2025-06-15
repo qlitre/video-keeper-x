@@ -1,6 +1,5 @@
 import { createRoute } from 'honox/factory'
 import { XEmbed } from '../islands/x-embed'
-import { Header } from '../components/Header'
 import { Pagination } from '../components/Pagination'
 import { getVideosWithCount, Video } from '../db'
 import { calculatePagination, validatePageNumber, SETTINGS } from '../settings'
@@ -31,10 +30,7 @@ export default createRoute(async (c) => {
   const pagination = calculatePagination(totalCount, currentPage, limit)
 
   return c.render(
-    <div class='min-h-screen bg-gray-50'>
-      <Header isAuthenticated={true} userEmail={user.email} />
-
-      <main class='max-w-7xl mx-auto py-6 sm:px-6 lg:px-8'>
+    <main class='max-w-7xl mx-auto py-6 sm:px-6 lg:px-8'>
         <div class='px-4 py-6 sm:px-0'>
           <form method='get' class='mb-6 max-w-md mx-auto flex gap-2'>
             <input
@@ -60,12 +56,6 @@ export default createRoute(async (c) => {
               </a>
             )}
           </form>
-          {/* ヒーローセクション */}
-          <div class='text-center mb-12'>
-            <p class='text-lg text-gray-600 max-w-2xl mx-auto'>
-              Xに投稿された動画URLを保存し、メタ情報で検索・管理するプロジェクトです。
-            </p>
-          </div>
           {/* 最新動画セクション */}
           {videoList.length > 0 && (
             <div class='mb-16'>
@@ -223,7 +213,6 @@ export default createRoute(async (c) => {
             </div>
           )}
         </div>
-      </main>
-    </div>
+    </main>
   )
 })

@@ -2,7 +2,6 @@ import { createRoute } from 'honox/factory'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import VideoAddForm from '../../islands/video-add-form'
-import { Header } from '../../components/Header'
 import { getCookie, deleteCookie } from 'hono/cookie'
 
 const schema = z.object({
@@ -25,9 +24,7 @@ export default createRoute(async (c) => {
   const savedFormData = getCookie(c, 'video_form_data')
 
   return c.render(
-    <div class='min-h-screen bg-gray-50'>
-      <Header isAuthenticated={true} userEmail={user.email} />
-      <main class='max-w-3xl mx-auto py-6 sm:px-6 lg:px-8'>
+    <main class='max-w-3xl mx-auto py-6 sm:px-6 lg:px-8'>
         <div class='px-4 py-6 sm:px-0'>
           <div class='bg-white shadow rounded-lg'>
             <div class='px-4 py-5 sm:p-6'>
@@ -50,8 +47,7 @@ export default createRoute(async (c) => {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   )
 })
 

@@ -1,7 +1,7 @@
 import { jsxRenderer } from 'hono/jsx-renderer'
 import { Link, Script } from 'honox/server'
-import { Header } from '../components/Header'
 
+// ログインページ専用レンダラー（Headerなし）
 export default jsxRenderer(({ children }) => {
   return (
     <html lang='ja'>
@@ -13,10 +13,7 @@ export default jsxRenderer(({ children }) => {
         <Script src='/app/client.ts' async />
       </head>
       <body>
-        <div class='min-h-screen bg-gray-50'>
-          <Header />
-          {children}
-        </div>
+        <div class='min-h-screen bg-gray-50'>{children}</div>
       </body>
     </html>
   )
