@@ -1,40 +1,27 @@
 import { createRoute } from 'honox/factory'
 import { checkauth } from '../../checkauth'
 import { Header } from '../../components/Header'
-
-interface Video {
-  id: string
-  video_url: string
-  x_account_id: string
-  artist_name: string
-  venue: string | null
-  event_date: string | null
-  song_name: string | null
-  created_at: string
-}
+import { Pagination } from '../../components/Pagination'
+import { getVideosForPage, Video, VideoListResult } from '../../db'
+import { calculatePagination, validatePageNumber, SETTINGS } from '../../settings'
 
 export default createRoute(async (c) => {
   const authResult = await checkauth(c);
 
   // 認証チェック結果を取得（未認証でも閲覧は許可）
 
-  // データベースから動画一覧を取得（アーティスト名もJOINで取得）
-  const videos = await c.env.DB.prepare(`
-    SELECT 
-      v.id,
-      v.video_url,
-      v.x_account_id,
-      a.name as artist_name,
-      v.venue,
-      v.event_date,
-      v.song_name,
-      v.created_at
-    FROM videos v
-    LEFT JOIN artists a ON v.artist_id = a.id
-    ORDER BY v.event_date DESC
-  `).all();
-
-  const videoList = videos.results as unknown as Video[];
+  // ページング処理
+  const pageParam = c.req.query('page')
+  const searchQuery = c.req.query('search')?.trim() || ''
+  
+  // データベースから動画一覧を取得（総数も含む）
+  const result = await getVideosForPage(c, 1, searchQuery) // 一時的に1ページ目を取得
+  const totalPages = Math.ceil(result.totalCount / SETTINGS.VIDEOS_PER_PAGE)
+  const currentPage = validatePageNumber(pageParam, totalPages)
+  
+  // 実際のページの動画を取得
+  const { videos: videoList, totalCount } = await getVideosForPage(c, currentPage, searchQuery)
+  const pagination = calculatePagination(totalCount, currentPage, SETTINGS.VIDEOS_PER_PAGE)
 
   return c.render(
     <div class="min-h-screen bg-gray-50">
@@ -45,11 +32,46 @@ export default createRoute(async (c) => {
 
       <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="px-4 py-6 sm:px-0">
-          <div class="mb-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">動画一覧</h1>
-            <div class="text-sm text-gray-600">
-              {videoList.length}件の動画が登録されています
+          <div class="mb-6">
+            <div class="flex justify-between items-center mb-4">
+              <h1 class="text-2xl font-bold text-gray-900">動画一覧</h1>
+              <div class="text-sm text-gray-600">
+                {pagination.totalCount}件の動画が登録されています
+                {pagination.totalCount > 0 && (
+                  <span class="ml-2">
+                    ({pagination.startItem}-{pagination.endItem}件目を表示)
+                  </span>
+                )}
+              </div>
             </div>
+            
+            {/* 検索フォーム */}
+            <form method="get" class="mb-4 max-w-md">
+              <div class="flex gap-2">
+                <input
+                  type="text"
+                  name="search"
+                  value={searchQuery}
+                  placeholder="アーティスト・曲名・会場名で検索"
+                  class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                />
+                <input type="hidden" name="page" value="1" />
+                <button
+                  type="submit"
+                  class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
+                >
+                  検索
+                </button>
+                {searchQuery && (
+                  <a
+                    href="/videos"
+                    class="px-4 py-2 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600"
+                  >
+                    クリア
+                  </a>
+                )}
+              </div>
+            </form>
           </div>
 
           {videoList.length === 0 ? (
@@ -161,6 +183,19 @@ export default createRoute(async (c) => {
               </div>
             </div>
           )}
+          
+          <Pagination
+            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            totalCount={pagination.totalCount}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+            hasNextPage={pagination.hasNextPage}
+            hasPrevPage={pagination.hasPrevPage}
+            basePath="/videos"
+            searchQuery={searchQuery}
+            compact={false}
+          />
         </div>
       </main>
     </div>
