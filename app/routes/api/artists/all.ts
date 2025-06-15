@@ -1,13 +1,7 @@
 import { createRoute } from 'honox/factory'
-import { checkauth } from '../../../checkauth'
 
 export default createRoute(async (c) => {
-  const authResult = await checkauth(c);
-
-  // 認証されていない場合は401エラー
-  if (!authResult.isAuthenticated) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
+  // ミドルウェアで認証済み
 
   try {
     // 全アーティストを取得（名前順）

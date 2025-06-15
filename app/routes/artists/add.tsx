@@ -1,7 +1,6 @@
 import { createRoute } from "honox/factory";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { checkauth } from "../../checkauth";
 import { Header } from "../../components/Header";
 
 const schema = z.object({
@@ -10,12 +9,8 @@ const schema = z.object({
 });
 
 export default createRoute(async (c) => {
-  const authResult = await checkauth(c);
-
-  // 認証されていない場合はログインページにリダイレクト
-  if (!authResult.isAuthenticated) {
-    return c.redirect("/login", 303);
-  }
+  // ミドルウェアで認証済み - ユーザー情報をコンテキストから取得
+  const user = c.get('user');
 
   const error = c.req.query("error");
   const success = c.req.query("success");
@@ -23,8 +18,8 @@ export default createRoute(async (c) => {
   return c.render(
     <div class="min-h-screen bg-gray-50">
       <Header
-        isAuthenticated={authResult.isAuthenticated}
-        userEmail={authResult.user?.email}
+        isAuthenticated={true}
+        userEmail={user.email}
       />
 
       <main class="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -129,12 +124,8 @@ export const POST = createRoute(
   }),
   async (c) => {
     try {
-      const authResult = await checkauth(c);
-
-      // 認証されていない場合はログインページにリダイレクト
-      if (!authResult.isAuthenticated) {
-        return c.redirect("/login", 303);
-      }
+      // ミドルウェアで認証済み - ユーザー情報をコンテキストから取得
+      const user = c.get('user');
 
       const { name, name_kana } = c.req.valid("form");
 

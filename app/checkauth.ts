@@ -69,3 +69,4 @@ export const checkauth = async (c: Context): Promise<{ isAuthenticated: boolean;
         }
     };
 }
+

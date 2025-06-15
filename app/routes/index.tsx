@@ -1,5 +1,4 @@
 import { createRoute } from 'honox/factory'
-import { checkauth } from '../checkauth'
 import { XEmbed } from '../islands/x-embed'
 import { Header } from '../components/Header'
 import { Pagination } from '../components/Pagination'
@@ -7,9 +6,8 @@ import { getVideosWithCount, Video } from '../db'
 import { calculatePagination, validatePageNumber, SETTINGS } from '../settings'
 
 export default createRoute(async (c) => {
-  const authResult = await checkauth(c);
-
-  // 認証チェック結果を取得（未認証でも閲覧は許可）
+  // ミドルウェアで認証済み - ユーザー情報をコンテキストから取得
+  const user = c.get('user');
 
   // ページング処理
   const pageParam = c.req.query('page')
@@ -35,8 +33,8 @@ export default createRoute(async (c) => {
   return c.render(
     <div class="min-h-screen bg-gray-50">
       <Header 
-        isAuthenticated={authResult.isAuthenticated} 
-        userEmail={authResult.user?.email}
+        isAuthenticated={true} 
+        userEmail={user.email}
       />
 
       <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -185,9 +183,7 @@ export default createRoute(async (c) => {
                 {search ? (
                   '別のキーワードで検索してみてください'
                 ) : (
-                  authResult.isAuthenticated 
-                    ? 'ヘッダーの「動画を投稿」ボタンから最初の動画を追加してみましょう' 
-                    : 'ユーザーが動画を投稿すると、ここに表示されます'
+                  'ヘッダーの「動画を投稿」ボタンから最初の動画を追加してみましょう'
                 )}
               </p>
             </div>

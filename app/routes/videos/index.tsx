@@ -1,14 +1,12 @@
 import { createRoute } from 'honox/factory'
-import { checkauth } from '../../checkauth'
 import { Header } from '../../components/Header'
 import { Pagination } from '../../components/Pagination'
 import { getVideosForPage, Video, VideoListResult } from '../../db'
 import { calculatePagination, validatePageNumber, SETTINGS } from '../../settings'
 
 export default createRoute(async (c) => {
-  const authResult = await checkauth(c);
-
-  // 認証チェック結果を取得（未認証でも閲覧は許可）
+  // ミドルウェアで認証済み - ユーザー情報をコンテキストから取得
+  const user = c.get('user');
 
   // ページング処理
   const pageParam = c.req.query('page')
@@ -26,8 +24,8 @@ export default createRoute(async (c) => {
   return c.render(
     <div class="min-h-screen bg-gray-50">
       <Header 
-        isAuthenticated={authResult.isAuthenticated} 
-        userEmail={authResult.user?.email}
+        isAuthenticated={true} 
+        userEmail={user.email}
       />
 
       <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -82,26 +80,14 @@ export default createRoute(async (c) => {
                 </svg>
                 <h3 class="mt-2 text-sm font-medium text-gray-900">動画がありません</h3>
                 <p class="mt-1 text-sm text-gray-500">
-                  {authResult.isAuthenticated 
-                    ? '最初の動画を追加してみましょう' 
-                    : 'まだ動画が投稿されていません'
-                  }
+                  最初の動画を追加してみましょう
                 </p>
-                {authResult.isAuthenticated ? (
-                  <a
-                    href="/videos/add"
-                    class="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    動画を追加
-                  </a>
-                ) : (
-                  <a
-                    href="/login"
-                    class="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    ログインして投稿
-                  </a>
-                )}
+                <a
+                  href="/videos/add"
+                  class="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  動画を追加
+                </a>
               </div>
             </div>
           ) : (
