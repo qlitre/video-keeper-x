@@ -20,6 +20,17 @@ export default createRoute(async (c) => {
   // Cookieから保存されたフォームデータを取得
   const savedFormData = getCookie(c, 'video_form_data')
 
+  // アーティスト一覧を取得
+  let artists = []
+  try {
+    const artistsResult = await c.env.DB.prepare(
+      'SELECT id, name, name_kana FROM artists ORDER BY name'
+    ).all()
+    artists = artistsResult.results || []
+  } catch (error) {
+    console.error('Failed to fetch artists:', error)
+  }
+
   return c.render(
     <main class='max-w-3xl mx-auto py-6 sm:px-6 lg:px-8'>
         <div class='px-4 py-6 sm:px-0'>
@@ -40,7 +51,7 @@ export default createRoute(async (c) => {
                   動画URLが正常に保存されました！
                 </div>
               )}
-              <VideoAddForm savedFormData={savedFormData} />
+              <VideoAddForm savedFormData={savedFormData} artists={artists as any} />
             </div>
           </div>
         </div>
@@ -56,9 +67,6 @@ export const POST = createRoute(
   }),
   async (c) => {
     try {
-      // ミドルウェアで認証済み - ユーザー情報をコンテキストから取得
-      const user = c.get('user')
-
       const { video_url, x_account_id, artist_id, venue, event_date, song_name } =
         c.req.valid('form')
 

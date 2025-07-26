@@ -17,16 +17,21 @@ interface FormData {
 
 interface VideoAddFormProps {
   savedFormData?: string
+  artists?: Artist[]
 }
 
-export default function VideoAddForm({ savedFormData }: VideoAddFormProps) {
+export default function VideoAddForm({ savedFormData, artists = [] }: VideoAddFormProps) {
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [artists, setArtists] = useState<Artist[]>([])
-  const [filteredArtists, setFilteredArtists] = useState<Artist[]>([])
+  const [filteredArtists, setFilteredArtists] = useState<Artist[]>(artists)
   const [searchQuery, setSearchQuery] = useState('')
-  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<FormData>({})
+
+
+  // artistsが更新されたときにfilteredArtistsも更新
+  useEffect(() => {
+    setFilteredArtists(artists)
+  }, [artists])
 
   // Cookieからデータを復元
   useEffect(() => {
@@ -69,7 +74,7 @@ export default function VideoAddForm({ savedFormData }: VideoAddFormProps) {
 
   const handleOpenModal = () => {
     setIsModalOpen(true)
-    fetchAllArtists()
+    setFilteredArtists(artists)
   }
 
   const handleCloseModal = () => {
@@ -91,22 +96,6 @@ export default function VideoAddForm({ savedFormData }: VideoAddFormProps) {
     }
   }, [searchQuery, artists])
 
-  const fetchAllArtists = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch('/api/artists/all')
-      if (response.ok) {
-        const data = (await response.json()) as Artist[]
-        setArtists(data)
-        setFilteredArtists(data)
-      } else {
-        console.error('API error:', response.status, await response.text())
-      }
-    } catch (error) {
-      console.error('Failed to fetch artists:', error)
-    }
-    setLoading(false)
-  }
 
   return (
     <>
@@ -355,11 +344,7 @@ export default function VideoAddForm({ savedFormData }: VideoAddFormProps) {
 
                     {/* Artists list */}
                     <div class="max-h-96 overflow-y-auto">
-                      {loading ? (
-                        <div class="flex justify-center py-8">
-                          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                        </div>
-                      ) : filteredArtists.length === 0 ? (
+                      {filteredArtists.length === 0 ? (
                         <div class="text-center py-8">
                           <div class="text-gray-500 mb-4">
                             {searchQuery
