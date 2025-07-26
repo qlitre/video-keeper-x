@@ -5,9 +5,6 @@ import { getVideosWithCount, Video } from '../db'
 import { calculatePagination, validatePageNumber, SETTINGS } from '../settings'
 
 export default createRoute(async (c) => {
-  // ミドルウェアで認証済み - ユーザー情報をコンテキストから取得
-  const user = c.get('user')
-
   // ページング処理
   const pageParam = c.req.query('page')
   const search = c.req.query('query')?.trim() || ''

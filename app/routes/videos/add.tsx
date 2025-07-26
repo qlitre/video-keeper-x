@@ -14,9 +14,6 @@ const schema = z.object({
 })
 
 export default createRoute(async (c) => {
-  // ミドルウェアで認証済み - ユーザー情報をコンテキストから取得
-  const user = c.get('user')
-
   const error = c.req.query('error')
   const success = c.req.query('success')
 

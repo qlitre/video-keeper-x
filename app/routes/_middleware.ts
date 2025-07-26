@@ -1,16 +1,13 @@
 import { createRoute } from 'honox/factory'
-import { requireAuthMiddleware } from '../middleware/auth'
+import { basicAuth } from 'hono/basic-auth'
 
-// 全てのルートに認証ミドルウェアを適用
-// ただし、ログインページとログアウトページは除外
-export default createRoute((c, next) => {
-  const path = c.req.path
-
-  // ログイン関連のページは認証をスキップ
-  if (path === '/login' || path === '/logout') {
-    return next()
-  }
-
-  // その他のページは認証必須
-  return requireAuthMiddleware(c, next)
-})
+// 全てのルートにBasic認証を適用
+export default createRoute(
+  basicAuth({
+    verifyUser: (username, password, c) => {
+      const expectedPassword = c.env.BASIC_AUTH_PASSWORD || 'admin123'
+      return username === 'admin' && password === expectedPassword
+    },
+    realm: 'Video Keeper X',
+  })
+)
