@@ -190,6 +190,12 @@ export async function updateVideo(
     song_name?: string
   }
 ): Promise<boolean> {
+  // まず対象の動画が存在するかチェック
+  const existingVideo = await getVideoById(c, id)
+  if (!existingVideo) {
+    return false
+  }
+
   const sql = `
     UPDATE videos
     SET video_url = ?, x_account_id = ?, artist_id = ?, venue = ?, event_date = ?, song_name = ?
@@ -208,7 +214,8 @@ export async function updateVideo(
     )
     .run()
 
-  return result.success && result.changes > 0
+  // 更新が成功したかチェック（変更がなくても成功とみなす）
+  return result.success
 }
 
 /**
