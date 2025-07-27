@@ -1,10 +1,5 @@
 import { useState, useEffect } from 'hono/jsx/dom'
-
-interface Artist {
-  id: string
-  name: string
-  name_kana: string
-}
+import type { Artist } from '../types'
 
 interface ArtistAutocompleteProps {
   onSelect: (artist: Artist) => void

@@ -3,12 +3,7 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import VideoAddForm from '../../islands/video-add-form'
 import { getCookie, deleteCookie } from 'hono/cookie'
-
-interface Artist {
-  id: string
-  name: string
-  name_kana: string
-}
+import type { Artist } from '../../types'
 
 const schema = z.object({
   video_url: z.string().url('有効なURLを入力してください'),

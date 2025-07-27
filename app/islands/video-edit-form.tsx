@@ -1,27 +1,5 @@
 import { useState, useEffect } from 'hono/jsx/dom'
-
-interface Artist {
-  id: string
-  name: string
-  name_kana: string
-}
-
-interface Video {
-  id: string
-  video_url: string
-  x_account_id: string
-  artist_name: string
-  artist_id?: string
-  venue: string | null
-  event_date: string | null
-  song_name: string | null
-  created_at: string
-}
-
-interface VideoEditFormProps {
-  video: Video
-  artists: Artist[]
-}
+import type { Artist, Video, VideoEditFormProps } from '../types'
 
 export default function VideoEditForm({ video, artists = [] }: VideoEditFormProps) {
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null)

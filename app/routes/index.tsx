@@ -1,7 +1,8 @@
 import { createRoute } from 'honox/factory'
 import { XEmbed } from '../islands/x-embed'
 import { Pagination } from '../components/Pagination'
-import { getVideosWithCount, Video } from '../db'
+import { getVideosWithCount } from '../db'
+import type { Video } from '../types'
 import { calculatePagination, validatePageNumber, SETTINGS } from '../settings'
 
 export default createRoute(async (c) => {

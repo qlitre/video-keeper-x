@@ -1,28 +1,6 @@
 import { Context } from 'hono'
 import { SETTINGS } from './settings'
-
-export interface Video {
-  id: string
-  video_url: string
-  x_account_id: string
-  artist_name: string
-  artist_id?: string
-  venue: string | null
-  event_date: string | null
-  song_name: string | null
-  created_at: string
-}
-
-export interface SearchOptions {
-  query?: string
-  limit?: number
-  offset?: number
-}
-
-export interface VideoListResult {
-  videos: Video[]
-  totalCount: number
-}
+import type { Video, SearchOptions, VideoListResult } from './types'
 
 /**
  * 動画の総数を取得する

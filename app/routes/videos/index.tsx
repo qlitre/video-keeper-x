@@ -1,6 +1,7 @@
 import { createRoute } from 'honox/factory'
 import { Pagination } from '../../components/Pagination'
-import { getVideosForPage, Video, VideoListResult } from '../../db'
+import { getVideosForPage } from '../../db'
+import type { Video, VideoListResult } from '../../types'
 import { calculatePagination, validatePageNumber, SETTINGS } from '../../settings'
 
 export default createRoute(async (c) => {

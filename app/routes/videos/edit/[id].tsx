@@ -3,12 +3,7 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import VideoEditForm from '../../../islands/video-edit-form'
 import { getVideoById, updateVideo } from '../../../db'
-
-interface Artist {
-  id: string
-  name: string
-  name_kana: string
-}
+import type { Artist } from '../../../types'
 
 const schema = z.object({
   video_url: z.string().url('有効なURLを入力してください'),
