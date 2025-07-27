@@ -6,6 +6,7 @@ export interface Video {
   video_url: string
   x_account_id: string
   artist_name: string
+  artist_id?: string
   venue: string | null
   event_date: string | null
   song_name: string | null
@@ -77,6 +78,7 @@ export async function getVideos(
       v.video_url,
       v.x_account_id,
       a.name as artist_name,
+      v.artist_id,
       v.venue,
       v.event_date,
       v.song_name,
@@ -142,4 +144,85 @@ export async function getVideosForPage(
     limit: SETTINGS.VIDEOS_PER_PAGE,
     offset,
   })
+}
+
+/**
+ * IDで動画を取得する
+ */
+export async function getVideoById(
+  c: Context,
+  id: string
+): Promise<Video | null> {
+  const sql = `
+    SELECT 
+      v.id,
+      v.video_url,
+      v.x_account_id,
+      a.name as artist_name,
+      v.artist_id,
+      v.venue,
+      v.event_date,
+      v.song_name,
+      v.created_at
+    FROM videos v
+    LEFT JOIN artists a ON v.artist_id = a.id
+    WHERE v.id = ?
+  `
+
+  const result = await c.env.DB.prepare(sql)
+    .bind(id)
+    .first()
+  return result as unknown as Video | null
+}
+
+/**
+ * 動画を更新する
+ */
+export async function updateVideo(
+  c: Context,
+  id: string,
+  data: {
+    video_url: string
+    x_account_id: string
+    artist_id?: string
+    venue?: string
+    event_date?: string
+    song_name?: string
+  }
+): Promise<boolean> {
+  const sql = `
+    UPDATE videos
+    SET video_url = ?, x_account_id = ?, artist_id = ?, venue = ?, event_date = ?, song_name = ?
+    WHERE id = ?
+  `
+
+  const result = await c.env.DB.prepare(sql)
+    .bind(
+      data.video_url,
+      data.x_account_id,
+      data.artist_id || null,
+      data.venue || null,
+      data.event_date || null,
+      data.song_name || null,
+      id
+    )
+    .run()
+
+  return result.success && result.changes > 0
+}
+
+/**
+ * 動画を削除する
+ */
+export async function deleteVideo(
+  c: Context,
+  id: string
+): Promise<boolean> {
+  const sql = `DELETE FROM videos WHERE id = ?`
+
+  const result = await c.env.DB.prepare(sql)
+    .bind(id)
+    .run()
+
+  return result.success && result.changes > 0
 }

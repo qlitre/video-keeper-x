@@ -147,14 +147,28 @@ export default createRoute(async (c) => {
                           {new Date(video.created_at).toLocaleDateString('ja-JP')}
                         </td>
                         <td class='px-6 py-4 whitespace-nowrap text-sm font-medium'>
-                          <a
-                            href={video.video_url}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            class='text-indigo-600 hover:text-indigo-900 mr-4'
-                          >
-                            動画を見る
-                          </a>
+                          <div class='flex space-x-2'>
+                            <a
+                              href={video.video_url}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              class='text-indigo-600 hover:text-indigo-900'
+                            >
+                              動画を見る
+                            </a>
+                            <a
+                              href={`/videos/edit/${video.id}`}
+                              class='text-blue-600 hover:text-blue-900'
+                            >
+                              編集
+                            </a>
+                            <a
+                              href={`/videos/delete/${video.id}`}
+                              class='text-red-600 hover:text-red-900'
+                            >
+                              削除
+                            </a>
+                          </div>
                         </td>
                       </tr>
                     ))}

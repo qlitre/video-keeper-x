@@ -1,8 +1,8 @@
 import { createRoute } from 'honox/factory'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
-import VideoAddForm from '../../islands/video-add-form'
-import { getCookie, deleteCookie } from 'hono/cookie'
+import VideoEditForm from '../../../islands/video-edit-form'
+import { getVideoById, updateVideo } from '../../../db'
 
 interface Artist {
   id: string
@@ -20,12 +20,20 @@ const schema = z.object({
 })
 
 export default createRoute(async (c) => {
+  const id = c.req.param('id')
   const error = c.req.query('error')
   const success = c.req.query('success')
 
-  // Cookieから保存されたフォームデータを取得
-  const savedFormData = getCookie(c, 'video_form_data')
+  if (!id) {
+    return c.redirect('/videos')
+  }
 
+  // 既存の動画データを取得
+  const video = await getVideoById(c, id)
+  if (!video) {
+    return c.redirect('/videos')
+  }
+  
   // アーティスト一覧を取得
   let artists: Artist[] = []
   try {
@@ -42,22 +50,23 @@ export default createRoute(async (c) => {
         <div class='px-4 py-6 sm:px-0'>
           <div class='bg-white shadow rounded-lg'>
             <div class='px-4 py-5 sm:p-6'>
-              <h2 class='text-lg font-medium text-gray-900 mb-6'>動画URLを追加</h2>
+              <h2 class='text-lg font-medium text-gray-900 mb-6'>動画情報を編集</h2>
 
               {error && (
                 <div class='mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded'>
                   {error === 'validation' && 'フォームの入力内容に問題があります。'}
                   {error === 'database' && 'データベースエラーが発生しました。'}
                   {error === 'server' && 'サーバーエラーが発生しました。'}
+                  {error === 'not_found' && '指定された動画が見つかりません。'}
                 </div>
               )}
 
               {success && (
                 <div class='mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded'>
-                  動画URLが正常に保存されました！
+                  動画情報が正常に更新されました！
                 </div>
               )}
-              <VideoAddForm savedFormData={savedFormData} artists={artists} />
+              <VideoEditForm video={video} artists={artists} />
             </div>
           </div>
         </div>
@@ -68,38 +77,39 @@ export default createRoute(async (c) => {
 export const POST = createRoute(
   zValidator('form', schema, (result, c) => {
     if (!result.success) {
-      return c.redirect('/videos/add?error=validation', 303)
+      const id = c.req.param('id')
+      return c.redirect(`/videos/edit/${id}?error=validation`, 303)
     }
   }),
   async (c) => {
     try {
+      const id = c.req.param('id')
+      if (!id) {
+        return c.redirect('/videos')
+      }
+
       const { video_url, x_account_id, artist_id, venue, event_date, song_name } =
         c.req.valid('form')
 
-      // 動画を保存
-      await c.env.DB.prepare(
-        `
-        INSERT INTO videos (video_url, x_account_id, artist_id, venue, event_date, song_name)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `
-      )
-        .bind(
-          video_url,
-          x_account_id,
-          artist_id,
-          venue || null,
-          event_date || null,
-          song_name || null
-        )
-        .run()
+      // 動画を更新
+      const success = await updateVideo(c, id, {
+        video_url,
+        x_account_id,
+        artist_id,
+        venue,
+        event_date,
+        song_name
+      })
 
-      // フォーム送信成功時にCookieをクリア
-      deleteCookie(c, 'video_form_data')
+      if (!success) {
+        return c.redirect(`/videos/edit/${id}?error=not_found`, 303)
+      }
 
-      return c.redirect('/videos/add?success=1', 303)
+      return c.redirect(`/videos/edit/${id}?success=1`, 303)
     } catch (err) {
-      console.error('Video save error:', err)
-      return c.redirect('/videos/add?error=database', 303)
+      console.error('Video update error:', err)
+      const id = c.req.param('id')
+      return c.redirect(`/videos/edit/${id}?error=database`, 303)
     }
   }
 )
