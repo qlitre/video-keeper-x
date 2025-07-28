@@ -102,7 +102,9 @@ export const POST = createRoute(
 
       // フォーム送信成功時にCookieをクリア
       deleteCookie(c, 'video_form_data')
-      setCookie(c, 'success', '動画URLが正常に保存されました！')
+      setCookie(c, 'success', '動画URLが正常に保存されました！', {
+        maxAge: 60
+      })
       return c.redirect('/videos/add', 303)
     } catch (err) {
       console.error('Video save error:', err)

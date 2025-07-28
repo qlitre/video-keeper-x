@@ -209,5 +209,5 @@ export async function deleteVideo(
     .bind(id)
     .run()
 
-  return result.success && result.changes > 0
+  return result.success && result.meta.changes > 0
 }

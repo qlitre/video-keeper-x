@@ -1,5 +1,6 @@
 import { createRoute } from 'honox/factory'
 import { getVideoById, deleteVideo } from '../../../db'
+import { setCookie } from 'hono/cookie'
 
 export default createRoute(async (c) => {
   const id = c.req.param('id')
@@ -117,7 +118,7 @@ export default createRoute(async (c) => {
                 >
                   キャンセル
                 </a>
-                <form method='post' style='display: inline;'>
+                <form method='post' action={`/videos/delete/${id}`} style='display: inline;'>
                   <button
                     type='submit'
                     class='bg-red-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
@@ -149,6 +150,9 @@ export const POST = createRoute(async (c) => {
     }
 
     // 削除成功時は動画一覧に戻る
+    setCookie(c, 'success', '動画が正常に削除されました！', {
+      maxAge: 60
+    })
     return c.redirect('/videos', 303)
   } catch (err) {
     console.error('Video delete error:', err)

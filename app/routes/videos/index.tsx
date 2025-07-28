@@ -1,10 +1,17 @@
 import { createRoute } from 'honox/factory'
 import { Pagination } from '../../components/Pagination'
 import { getVideosForPage } from '../../db'
+import { getCookie, deleteCookie } from 'hono/cookie'
 import type { Video, VideoListResult } from '../../types'
 import { calculatePagination, validatePageNumber, SETTINGS } from '../../settings'
 
 export default createRoute(async (c) => {
+  // 成功メッセージの取得と削除
+  const successMessage = getCookie(c, 'success')
+  if (successMessage) {
+    deleteCookie(c, 'success')
+  }
+
   // ページング処理
   const pageParam = c.req.query('page')
   const searchQuery = c.req.query('search')?.trim() || ''
@@ -33,6 +40,13 @@ export default createRoute(async (c) => {
                 )}
               </div>
             </div>
+
+            {/* 成功メッセージ */}
+            {successMessage && (
+              <div class='mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded'>
+                {successMessage}
+              </div>
+            )}
 
             {/* 検索フォーム */}
             <form method='get' class='mb-4 max-w-md'>

@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import VideoEditForm from '../../../islands/video-edit-form'
 import { getVideoById, updateVideo } from '../../../db'
+import { getCookie, deleteCookie, setCookie } from 'hono/cookie'
 import type { Artist } from '../../../types'
 
 const schema = z.object({
@@ -17,7 +18,12 @@ const schema = z.object({
 export default createRoute(async (c) => {
   const id = c.req.param('id')
   const error = c.req.query('error')
-  const success = c.req.query('success')
+  const successMessage = getCookie(c, 'success')
+
+  // 成功メッセージが存在する場合、表示後すぐに削除
+  if (successMessage) {
+    deleteCookie(c, 'success')
+  }
 
   if (!id) {
     return c.redirect('/videos')
@@ -35,7 +41,14 @@ export default createRoute(async (c) => {
     const artistsResult = await c.env.DB.prepare(
       'SELECT id, name, name_kana FROM artists ORDER BY name'
     ).all()
-    artists = (artistsResult.results || []) as unknown as Artist[]
+    
+    if (artistsResult.results) {
+      artists = artistsResult.results.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        name_kana: row.name_kana || ''
+      }))
+    }
   } catch (error) {
     console.error('Failed to fetch artists:', error)
   }
@@ -56,9 +69,9 @@ export default createRoute(async (c) => {
                 </div>
               )}
 
-              {success && (
+              {successMessage && (
                 <div class='mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded'>
-                  動画情報が正常に更新されました！
+                  {successMessage}
                 </div>
               )}
               <VideoEditForm video={video} artists={artists} />
@@ -100,7 +113,10 @@ export const POST = createRoute(
         return c.redirect(`/videos/edit/${id}?error=not_found`, 303)
       }
 
-      return c.redirect(`/videos/edit/${id}?success=1`, 303)
+      setCookie(c, 'success', '動画情報が正常に更新されました！', {
+        maxAge: 60
+      })
+      return c.redirect(`/videos/edit/${id}`, 303)
     } catch (err) {
       console.error('Video update error:', err)
       const id = c.req.param('id')
