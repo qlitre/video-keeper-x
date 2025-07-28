@@ -103,9 +103,6 @@ export const POST = createRoute(
   }),
   async (c) => {
     try {
-      // ミドルウェアで認証済み - ユーザー情報をコンテキストから取得
-      const user = c.get('user')
-
       const { name, name_kana } = c.req.valid('form')
 
       // 既存アーティストチェック
